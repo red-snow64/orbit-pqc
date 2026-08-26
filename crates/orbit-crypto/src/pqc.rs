@@ -1,3 +1,5 @@
+use pqcrypto_dilithium::dilithium3;
+use pqcrypto_kyber::kyber768;
 use pqcrypto_traits::kem::{
     Ciphertext as KemCiphertextTrait, PublicKey as KemPublicKeyTrait,
     SecretKey as KemSecretKeyTrait, SharedSecret as KemSharedSecretTrait,
@@ -6,23 +8,21 @@ use pqcrypto_traits::sign::{
     DetachedSignature as SignDetachedTrait, PublicKey as SignPublicKeyTrait,
     SecretKey as SignSecretKeyTrait,
 };
-use pqcrypto_kyber::kyber768;
-use pqcrypto_dilithium::dilithium3;
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::allocator::SecBox;
 use crate::error::{CryptoError, Result};
 
 // --- FIPS 203 (ML-KEM-768 / Kyber-768) Parameter Sizes ---
-pub const ML_KEM_768_PUBLIC_KEY_SIZE: usize = kyber768::public_key_bytes();     // 1184 B
-pub const ML_KEM_768_SECRET_KEY_SIZE: usize = kyber768::secret_key_bytes();     // 2400 B
-pub const ML_KEM_768_CIPHERTEXT_SIZE: usize = kyber768::ciphertext_bytes();     // 1088 B
+pub const ML_KEM_768_PUBLIC_KEY_SIZE: usize = kyber768::public_key_bytes(); // 1184 B
+pub const ML_KEM_768_SECRET_KEY_SIZE: usize = kyber768::secret_key_bytes(); // 2400 B
+pub const ML_KEM_768_CIPHERTEXT_SIZE: usize = kyber768::ciphertext_bytes(); // 1088 B
 pub const ML_KEM_768_SHARED_SECRET_SIZE: usize = kyber768::shared_secret_bytes(); // 32 B
 
 // --- FIPS 204 (ML-DSA-65 / Dilithium3) Parameter Sizes ---
-pub const ML_DSA_65_PUBLIC_KEY_SIZE: usize = dilithium3::public_key_bytes();     // 1952 B
-pub const ML_DSA_65_SECRET_KEY_SIZE: usize = dilithium3::secret_key_bytes();     // 4016/4032 B
-pub const ML_DSA_65_SIGNATURE_SIZE: usize = dilithium3::signature_bytes();       // 3293/3309 B
+pub const ML_DSA_65_PUBLIC_KEY_SIZE: usize = dilithium3::public_key_bytes(); // 1952 B
+pub const ML_DSA_65_SECRET_KEY_SIZE: usize = dilithium3::secret_key_bytes(); // 4016/4032 B
+pub const ML_DSA_65_SIGNATURE_SIZE: usize = dilithium3::signature_bytes(); // 3293/3309 B
 
 // =====================================================================
 // 1. ML-KEM-768 (Lattice-Based Key Encapsulation)
@@ -66,12 +66,13 @@ impl MlKem768 {
 
     /// Encapsulates shared secret against public key via Module-LWE math
     pub fn encapsulate(recipient_pk: &MlKemPublicKey) -> Result<(MlKemCiphertext, SharedSecret)> {
-        let pk = kyber768::PublicKey::from_bytes(&recipient_pk.0)
-            .map_err(|_| CryptoError::InvalidKeySize {
+        let pk = kyber768::PublicKey::from_bytes(&recipient_pk.0).map_err(|_| {
+            CryptoError::InvalidKeySize {
                 scheme: "ML-KEM-768",
                 expected: ML_KEM_768_PUBLIC_KEY_SIZE,
                 actual: recipient_pk.0.len(),
-            })?;
+            }
+        })?;
 
         let (ss, ct) = kyber768::encapsulate(&pk);
 
@@ -89,18 +90,20 @@ impl MlKem768 {
         secret_key: &MlKemSecretKey,
         ciphertext: &MlKemCiphertext,
     ) -> Result<SharedSecret> {
-        let sk = kyber768::SecretKey::from_bytes(&secret_key.0)
-            .map_err(|_| CryptoError::InvalidKeySize {
+        let sk = kyber768::SecretKey::from_bytes(&secret_key.0).map_err(|_| {
+            CryptoError::InvalidKeySize {
                 scheme: "ML-KEM-768",
                 expected: ML_KEM_768_SECRET_KEY_SIZE,
                 actual: secret_key.0.len(),
-            })?;
+            }
+        })?;
 
-        let ct = kyber768::Ciphertext::from_bytes(&ciphertext.0)
-            .map_err(|_| CryptoError::InvalidCiphertextSize {
+        let ct = kyber768::Ciphertext::from_bytes(&ciphertext.0).map_err(|_| {
+            CryptoError::InvalidCiphertextSize {
                 expected: ML_KEM_768_CIPHERTEXT_SIZE,
                 actual: ciphertext.0.len(),
-            })?;
+            }
+        })?;
 
         let ss = kyber768::decapsulate(&ct, &sk);
 
@@ -150,12 +153,13 @@ impl MlDsa65 {
 
     /// Signs message using Fiat-Shamir with Aborts lattice framework
     pub fn sign(secret_key: &MlDsaSecretKey, message: &[u8]) -> Result<MlDsaSignature> {
-        let sk = dilithium3::SecretKey::from_bytes(&secret_key.0)
-            .map_err(|_| CryptoError::InvalidKeySize {
+        let sk = dilithium3::SecretKey::from_bytes(&secret_key.0).map_err(|_| {
+            CryptoError::InvalidKeySize {
                 scheme: "ML-DSA-65",
                 expected: ML_DSA_65_SECRET_KEY_SIZE,
                 actual: secret_key.0.len(),
-            })?;
+            }
+        })?;
 
         let sig = dilithium3::detached_sign(message, &sk);
 
@@ -171,18 +175,20 @@ impl MlDsa65 {
         message: &[u8],
         signature: &MlDsaSignature,
     ) -> Result<()> {
-        let pk = dilithium3::PublicKey::from_bytes(&public_key.0)
-            .map_err(|_| CryptoError::InvalidKeySize {
+        let pk = dilithium3::PublicKey::from_bytes(&public_key.0).map_err(|_| {
+            CryptoError::InvalidKeySize {
                 scheme: "ML-DSA-65",
                 expected: ML_DSA_65_PUBLIC_KEY_SIZE,
                 actual: public_key.0.len(),
-            })?;
+            }
+        })?;
 
-        let sig = dilithium3::DetachedSignature::from_bytes(&signature.0)
-            .map_err(|_| CryptoError::InvalidSignatureSize {
+        let sig = dilithium3::DetachedSignature::from_bytes(&signature.0).map_err(|_| {
+            CryptoError::InvalidSignatureSize {
                 expected: ML_DSA_65_SIGNATURE_SIZE,
                 actual: signature.0.len(),
-            })?;
+            }
+        })?;
 
         dilithium3::verify_detached_signature(&sig, message, &pk)
             .map_err(|_| CryptoError::VerificationError)

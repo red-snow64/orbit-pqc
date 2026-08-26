@@ -9,10 +9,7 @@ pub enum NetError {
     InvalidHeader(String),
 
     #[error("CRC32 mismatch: expected 0x{expected:08X}, computed 0x{computed:08X}")]
-    CrcMismatch {
-        expected: u32,
-        computed: u32,
-    },
+    CrcMismatch { expected: u32, computed: u32 },
 
     #[error("Operation timed out after {0} ms")]
     Timeout(u64),

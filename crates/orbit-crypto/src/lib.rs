@@ -7,8 +7,8 @@ pub mod prelude {
     pub use crate::allocator::{SecBox, SecBuffer};
     pub use crate::error::{CryptoError, Result as CryptoResult};
     pub use crate::pqc::{
-        MlDsa65, MlDsaKeyPair, MlDsaPublicKey, MlDsaSecretKey, MlDsaSignature,
-        MlKem768, MlKemCiphertext, MlKemKeyPair, MlKemPublicKey, MlKemSecretKey, SharedSecret,
+        MlDsa65, MlDsaKeyPair, MlDsaPublicKey, MlDsaSecretKey, MlDsaSignature, MlKem768,
+        MlKemCiphertext, MlKemKeyPair, MlKemPublicKey, MlKemSecretKey, SharedSecret,
         ML_DSA_65_PUBLIC_KEY_SIZE, ML_DSA_65_SECRET_KEY_SIZE, ML_DSA_65_SIGNATURE_SIZE,
         ML_KEM_768_CIPHERTEXT_SIZE, ML_KEM_768_PUBLIC_KEY_SIZE, ML_KEM_768_SECRET_KEY_SIZE,
         ML_KEM_768_SHARED_SECRET_SIZE,
@@ -26,7 +26,8 @@ mod tests {
         let (ciphertext, sender_shared_secret) =
             MlKem768::encapsulate(&receiver_keypair.public_key).expect("Encaps failed");
         let receiver_shared_secret =
-            MlKem768::decapsulate(&receiver_keypair.secret_key, &ciphertext).expect("Decaps failed");
+            MlKem768::decapsulate(&receiver_keypair.secret_key, &ciphertext)
+                .expect("Decaps failed");
 
         assert_eq!(
             sender_shared_secret.0, receiver_shared_secret.0,

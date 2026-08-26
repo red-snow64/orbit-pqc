@@ -1,8 +1,8 @@
+use crate::error::{CryptoError, Result};
 use std::alloc::{alloc_zeroed, dealloc, Layout};
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 use zeroize::Zeroize;
-use crate::error::{CryptoError, Result};
 
 /// A memory-locked, heap-allocated byte buffer that zeroizes on drop.
 pub struct SecBuffer {
@@ -18,11 +18,13 @@ impl SecBuffer {
     /// Allocates `size` zeroed bytes locked in physical RAM.
     pub fn new(size: usize) -> Result<Self> {
         if size == 0 {
-            return Err(CryptoError::AllocationError("Cannot allocate 0 bytes".into()));
+            return Err(CryptoError::AllocationError(
+                "Cannot allocate 0 bytes".into(),
+            ));
         }
 
-        let layout = Layout::array::<u8>(size)
-            .map_err(|e| CryptoError::AllocationError(e.to_string()))?;
+        let layout =
+            Layout::array::<u8>(size).map_err(|e| CryptoError::AllocationError(e.to_string()))?;
 
         let raw_ptr = unsafe { alloc_zeroed(layout) };
         let ptr = NonNull::new(raw_ptr)

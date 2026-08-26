@@ -1,9 +1,9 @@
-use std::net::{SocketAddr, UdpSocket};
-use std::time::Duration;
 use crate::arq::SelectiveRepeatArq;
 use crate::ccsds::{format_frame, parse_frame, CcsdsHeader, MsgType};
 use crate::error::{NetError, Result};
 use crate::fragmenter::{Fragmenter, ReassemblyBuffer};
+use std::net::{SocketAddr, UdpSocket};
+use std::time::Duration;
 
 pub struct OrbitSocket {
     pub socket: UdpSocket,
@@ -27,9 +27,9 @@ impl OrbitSocket {
     ) -> Result<Self> {
         let socket = UdpSocket::bind(bind_addr)
             .map_err(|e| NetError::SocketError(format!("Bind to {} failed: {}", bind_addr, e)))?;
-        let peer: SocketAddr = peer_addr
-            .parse()
-            .map_err(|e| NetError::SocketError(format!("Invalid peer address {}: {}", peer_addr, e)))?;
+        let peer: SocketAddr = peer_addr.parse().map_err(|e| {
+            NetError::SocketError(format!("Invalid peer address {}: {}", peer_addr, e))
+        })?;
 
         socket
             .set_read_timeout(Some(Duration::from_millis(5)))
@@ -105,14 +105,18 @@ impl OrbitSocket {
 
                     self.send_ack(header.sequence_count)?;
 
-                    if let Some(completed_msg) = self.reassembler.insert_fragment(&header, payload)? {
+                    if let Some(completed_msg) =
+                        self.reassembler.insert_fragment(&header, payload)?
+                    {
                         return Ok((header.msg_type, completed_msg));
                     }
                 }
-                Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock
-                    || e.kind() == std::io::ErrorKind::TimedOut
-                    || e.kind() == std::io::ErrorKind::ConnectionRefused
-                    || e.kind() == std::io::ErrorKind::ConnectionReset => {
+                Err(ref e)
+                    if e.kind() == std::io::ErrorKind::WouldBlock
+                        || e.kind() == std::io::ErrorKind::TimedOut
+                        || e.kind() == std::io::ErrorKind::ConnectionRefused
+                        || e.kind() == std::io::ErrorKind::ConnectionReset =>
+                {
                     std::thread::sleep(Duration::from_millis(1));
                 }
                 Err(e) => return Err(NetError::SocketError(e.to_string())),

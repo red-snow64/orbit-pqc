@@ -1,6 +1,6 @@
+use crate::error::{NetError, Result};
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
-use crate::error::{NetError, Result};
 
 pub const MAX_RETRIES: u8 = 5;
 
@@ -59,7 +59,8 @@ impl SelectiveRepeatArq {
                 let delta = sample_rtt - self.srtt_ms;
                 self.srtt_ms += 0.125 * delta;
                 self.rttvar_ms += 0.25 * (delta.abs() - self.rttvar_ms);
-                self.rto_ms = (self.srtt_ms + 4.0 * self.rttvar_ms).clamp(self.min_rto_ms, self.max_rto_ms);
+                self.rto_ms =
+                    (self.srtt_ms + 4.0 * self.rttvar_ms).clamp(self.min_rto_ms, self.max_rto_ms);
             }
         }
     }
@@ -76,7 +77,8 @@ impl SelectiveRepeatArq {
 
             // Exponential backoff multiplier: 2^retries (1x, 2x, 4x, 8x, 16x)
             let backoff_multiplier = 1u32.checked_shl(frame.retries as u32).unwrap_or(32);
-            let effective_rto_ms = (self.rto_ms * (backoff_multiplier as f64)).clamp(self.min_rto_ms, self.max_rto_ms);
+            let effective_rto_ms =
+                (self.rto_ms * (backoff_multiplier as f64)).clamp(self.min_rto_ms, self.max_rto_ms);
             let effective_rto = Duration::from_millis(effective_rto_ms as u64);
 
             if now.duration_since(frame.sent_at) > effective_rto {

@@ -16,16 +16,10 @@ pub enum CryptoError {
     },
 
     #[error("Invalid ciphertext size: expected {expected}, got {actual}")]
-    InvalidCiphertextSize {
-        expected: usize,
-        actual: usize,
-    },
+    InvalidCiphertextSize { expected: usize, actual: usize },
 
     #[error("Invalid signature size: expected {expected}, got {actual}")]
-    InvalidSignatureSize {
-        expected: usize,
-        actual: usize,
-    },
+    InvalidSignatureSize { expected: usize, actual: usize },
 
     #[error("Signature verification failed")]
     VerificationError,

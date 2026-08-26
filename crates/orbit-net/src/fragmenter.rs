@@ -1,6 +1,6 @@
-use std::collections::HashMap;
 use crate::ccsds::{format_frame, CcsdsHeader, MsgType, CCSDS_HEADER_LEN};
 use crate::error::{NetError, Result};
+use std::collections::HashMap;
 
 pub struct Fragmenter {
     mtu: usize,
@@ -21,7 +21,9 @@ impl Fragmenter {
     ) -> Result<Vec<Vec<u8>>> {
         let max_frag_payload = self.mtu.saturating_sub(CCSDS_HEADER_LEN + 4);
         if max_frag_payload == 0 {
-            return Err(NetError::InvalidHeader("MTU too small for CCSDS framing".into()));
+            return Err(NetError::InvalidHeader(
+                "MTU too small for CCSDS framing".into(),
+            ));
         }
 
         if payload.is_empty() {
@@ -50,7 +52,7 @@ impl Fragmenter {
         Ok(frames)
     }
 }
-
+#[derive(Debug, Default)]
 pub struct ReassemblyBuffer {
     sessions: HashMap<u16, HashMap<usize, Vec<u8>>>,
 }

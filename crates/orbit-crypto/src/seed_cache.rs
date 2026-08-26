@@ -1,19 +1,19 @@
-use std::alloc::{alloc_zeroed, dealloc, Layout};
-use std::ptr;
-use std::time::Duration;
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
 use sha3::{
     digest::{ExtendableOutput, Update, XofReader},
     Shake256,
 };
+use std::alloc::{alloc_zeroed, dealloc, Layout};
+use std::ptr;
+use std::time::Duration;
 use zeroize::Zeroize;
 
 use crate::allocator::SecBox;
 use crate::error::{CryptoError, Result};
 use crate::pqc::{
-    MlKemKeyPair, MlKemPublicKey, MlKemSecretKey,
-    ML_KEM_768_PUBLIC_KEY_SIZE, ML_KEM_768_SECRET_KEY_SIZE,
+    MlKemKeyPair, MlKemPublicKey, MlKemSecretKey, ML_KEM_768_PUBLIC_KEY_SIZE,
+    ML_KEM_768_SECRET_KEY_SIZE,
 };
 
 type HmacSha256 = Hmac<Sha256>;
@@ -37,14 +37,18 @@ impl LockedSeedBuffer {
         unsafe {
             let ptr = alloc_zeroed(layout);
             if ptr.is_null() {
-                return Err(CryptoError::AllocationError("Failed to allocate page-aligned buffer".into()));
+                return Err(CryptoError::AllocationError(
+                    "Failed to allocate page-aligned buffer".into(),
+                ));
             }
 
             #[cfg(unix)]
             {
                 if libc::mlock(ptr as *const libc::c_void, SEED_SIZE) != 0 {
                     dealloc(ptr, layout);
-                    return Err(CryptoError::MemoryLockError("mlock system call failed".into()));
+                    return Err(CryptoError::MemoryLockError(
+                        "mlock system call failed".into(),
+                    ));
                 }
             }
 
@@ -136,7 +140,8 @@ impl EpochState {
 
         let mut reader = hasher.finalize_xof();
 
-        let mut raw_key_material = vec![0u8; ML_KEM_768_PUBLIC_KEY_SIZE + ML_KEM_768_SECRET_KEY_SIZE];
+        let mut raw_key_material =
+            vec![0u8; ML_KEM_768_PUBLIC_KEY_SIZE + ML_KEM_768_SECRET_KEY_SIZE];
         reader.read(&mut raw_key_material);
 
         let mut pk_bytes = [0u8; ML_KEM_768_PUBLIC_KEY_SIZE];
@@ -220,7 +225,10 @@ mod tests {
         let ticket_e1 = epoch_state.generate_prekey_ticket(1).unwrap();
         let keypair_e1 = epoch_state.derive_prekey_pair(1).unwrap();
 
-        assert_ne!(ticket_e0, ticket_e1, "Tickets must isolate across epoch boundaries");
+        assert_ne!(
+            ticket_e0, ticket_e1,
+            "Tickets must isolate across epoch boundaries"
+        );
         assert_ne!(
             keypair_e0.public_key.0, keypair_e1.public_key.0,
             "Derived keys must isolate across epoch boundaries"
@@ -238,6 +246,10 @@ mod tests {
         assert_eq!(locked_buf.as_slice(), &raw_seed);
 
         drop(locked_buf);
-        assert_eq!(buf_addr % 4096, 0, "Buffer was not aligned to page boundary for mlock");
+        assert_eq!(
+            buf_addr % 4096,
+            0,
+            "Buffer was not aligned to page boundary for mlock"
+        );
     }
 }

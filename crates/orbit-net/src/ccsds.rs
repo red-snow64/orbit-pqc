@@ -20,7 +20,10 @@ impl MsgType {
             0x03 => Ok(MsgType::PrekeyTicket),
             0x04 => Ok(MsgType::ArqAck),
             0x05 => Ok(MsgType::RatchetRekey),
-            _ => Err(NetError::InvalidHeader(format!("Unknown MsgType: 0x{:02X}", val))),
+            _ => Err(NetError::InvalidHeader(format!(
+                "Unknown MsgType: 0x{:02X}",
+                val
+            ))),
         }
     }
 }
@@ -62,6 +65,7 @@ pub fn format_frame(hdr: &CcsdsHeader, payload: &[u8]) -> Result<Vec<u8>> {
     let mut frame = vec![0u8; CCSDS_HEADER_LEN + payload.len() + 4];
 
     // Primary Header (6 Bytes)
+    #[allow(clippy::identity_op)]
     let packet_id: u16 = (0b000 << 13) | (1 << 11) | (hdr.apid & 0x7FF);
     frame[0..2].copy_from_slice(&packet_id.to_be_bytes());
 
@@ -90,7 +94,9 @@ pub fn format_frame(hdr: &CcsdsHeader, payload: &[u8]) -> Result<Vec<u8>> {
 
 pub fn parse_frame(raw: &[u8]) -> Result<(CcsdsHeader, &[u8])> {
     if raw.len() < CCSDS_HEADER_LEN + 4 {
-        return Err(NetError::InvalidHeader("Frame truncated below minimum length".into()));
+        return Err(NetError::InvalidHeader(
+            "Frame truncated below minimum length".into(),
+        ));
     }
 
     let payload_and_hdr_len = raw.len() - 4;
