@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/orbit-crypto",
+    "crates/orbit-net",
+    "crates/orbit-node",
+]

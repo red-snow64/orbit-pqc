@@ -1,0 +1,32 @@
+\begin{table}[t]
+\centering
+\caption{Ablation: Synchronous Ticket vs. Async ML-KEM-1024 Ratchet}
+\label{tab:ablation_summary}
+\begin{tabular}{rcccc}
+\toprule
+\textbf{Bitrate} & \textbf{Ticket (ms)} & \textbf{Ratchet (ms)} & \textbf{Ratio} & \textbf{Pass Cost (30s)} \\
+\midrule
+64~kbps & 104.9 & 525.8 & 5.0$\times$ & 0.35\% \\
+128~kbps & 66.9 & 277.2 & 4.1$\times$ & 0.22\% \\
+256~kbps & 47.5 & 148.3 & 3.1$\times$ & 0.16\% \\
+512~kbps & 37.2 & 93.5 & 2.5$\times$ & 0.12\% \\
+1024~kbps & 35.7 & 57.4 & 1.6$\times$ & 0.12\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Empirical Comparison under SGP4 Crossing Pass (128~kbps)}
+\label{tab:sgp4_summary}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Protocol Mode} & \textbf{Mean (ms)} & \textbf{$p_{95}$ (ms)} & \textbf{Success} & \textbf{$\eta_{\text{win}}$ (30s)} \\
+\midrule
+Classical (ECDH) & 88.3 & 87.2 & 100\% & 99.71\% \\
+Naive PQC (FIPS 203/204) & 816.8 & 1069.2 & 100\% & 96.44\% \\
+\textbf{ORBIT-PQC (Ours)} & \textbf{88.8} & \textbf{136.0} & \textbf{100\%} & \textbf{99.55\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+

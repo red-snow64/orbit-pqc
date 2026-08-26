@@ -1,0 +1,99 @@
+name: ORBIT-PQC Testbed CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  rust-engine:
+    name: Rust Protocol Engine Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cargo Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Check Formatting
+        run: cargo fmt --check
+
+      - name: Clippy Linter
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Run Cryptographic & Unit Tests
+        run: cargo test --release --workspace
+
+      - name: Compile Release Binaries
+        run: cargo build --release
+
+  python-pipeline:
+    name: Python Data Pipeline & Physics Sanity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install numpy pandas scipy matplotlib sgp4
+
+      - name: Verify SGP4 Constellation Physics Generation
+        run: python3 python/experiments/sgp4_emulator.py
+
+      - name: Verify Dynamic LaTeX Parsing Pipeline
+        run: python3 python/experiments/parser.py
+
+      - name: Verify Plot Generation
+        run: python3 python/plots/generate_ieee_plots.py
+
+  latex-paper:
+    name: IEEE Transactions Paper Compilation
+    runs-on: ubuntu-latest
+    needs: [rust-engine, python-pipeline]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install TeX Live
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
+
+      - name: Generate Dynamic LaTeX Artifacts
+        run: |
+          pip install numpy pandas matplotlib
+          python3 python/plots/generate_ieee_plots.py
+          python3 python/experiments/parser.py
+
+      - name: Compile brief.tex
+        run: |
+          cd paper
+          pdflatex -interaction=nonstopmode brief.tex
+          pdflatex -interaction=nonstopmode brief.tex
+
+      - name: Upload PDF Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: brief-pdf
+          path: paper/brief.pdf

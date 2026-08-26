@@ -1,0 +1,21 @@
+[package]
+name = "orbit-node"
+version = "0.1.0"
+edition = "2021"
+authors = ["Orbit Core Team"]
+description = "Executable node daemon and telemetry collector for ORBIT-PQC"
+
+[dependencies]
+orbit-crypto = { path = "../orbit-crypto" }
+orbit-net = { path = "../orbit-net" }
+clap = { version = "4.4", features = ["derive"] }
+chrono = { version = "0.4", features = ["serde"] }
+tokio = { version = "1.35", features = ["full", "net", "time"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+rand = "0.8"
+sha2 = "0.10"
+hmac = "0.12"
+sha3 = "0.10"
+subtle = "2.5"

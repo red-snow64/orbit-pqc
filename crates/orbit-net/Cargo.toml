@@ -1,0 +1,16 @@
+[package]
+name = "orbit-net"
+version = "0.1.0"
+edition = "2021"
+authors = ["Orbit Core Team"]
+description = "CCSDS framing, MTU fragmentation, and Selective-Repeat ARQ for LEO links"
+
+[dependencies]
+orbit-crypto = { path = "../orbit-crypto" }
+thiserror = "1.0"
+byteorder = "1.5"
+bytes = "1.5"
+crc = "3.0"
+crc32fast = "1.4"
+[dev-dependencies]
+proptest = "1.4"
