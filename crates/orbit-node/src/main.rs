@@ -172,7 +172,12 @@ impl PayloadSpec {
 pub struct CryptoEngine;
 
 impl CryptoEngine {
-    pub fn derive_orbit_ticket(epoch_seed: &[u8; 32], epoch: u32, seq: u32, nonce: &[u8; 16]) -> Vec<u8> {
+    pub fn derive_orbit_ticket(
+        epoch_seed: &[u8; 32],
+        epoch: u32,
+        seq: u32,
+        nonce: &[u8; 16],
+    ) -> Vec<u8> {
         let mut mac = HmacSha256::new_from_slice(epoch_seed).expect("HMAC init");
         Mac::update(&mut mac, b"ORBIT_INIT");
         Mac::update(&mut mac, &epoch.to_be_bytes());
@@ -228,7 +233,7 @@ async fn send_reliable_stage(
     let header_size = 8;
     let max_payload = (mtu as usize).saturating_sub(header_size).max(64);
     let total_bytes = payload.len();
-    let total_frags = ((total_bytes + max_payload - 1) / max_payload) as u16;
+    let total_frags = total_bytes.div_ceil(max_payload) as u16;
 
     let mut fragments: Vec<Vec<u8>> = Vec::with_capacity(total_frags as usize);
     let mut offset = 0;
@@ -264,7 +269,11 @@ async fn send_reliable_stage(
         // Transmit unacknowledged fragments
         for frag_idx in 0..total_frags {
             if (acked_mask & (1u64 << frag_idx)) == 0 {
-                if let Err(_) = socket.send_to(&fragments[frag_idx as usize], peer).await {
+                if socket
+                    .send_to(&fragments[frag_idx as usize], peer)
+                    .await
+                    .is_err()
+                {
                     return Err("socket_send_error");
                 }
                 metrics.frames_sent += 1;
@@ -283,7 +292,8 @@ async fn send_reliable_stage(
 
             match tokio::time::timeout(time_left, socket.recv_from(&mut recv_buf)).await {
                 Ok(Ok((len, src))) => {
-                    if len >= 12 && src == peer && recv_buf[0] == stage_id && recv_buf[1] == PKT_ACK {
+                    if len >= 12 && src == peer && recv_buf[0] == stage_id && recv_buf[1] == PKT_ACK
+                    {
                         let remote_mask = u64::from_be_bytes(recv_buf[2..10].try_into().unwrap());
                         acked_mask |= remote_mask;
                         metrics.frames_recv += 1;
@@ -317,7 +327,7 @@ async fn receive_reliable_stage(
 ) -> Result<(SocketAddr, Vec<u8>), &'static str> {
     let header_size = 8;
     let max_payload = (mtu as usize).saturating_sub(header_size).max(64);
-    let expected_frags = ((expected_total_bytes + max_payload - 1) / max_payload) as u16;
+    let expected_frags = expected_total_bytes.div_ceil(max_payload) as u16;
 
     let target_mask: u64 = if expected_frags >= 64 {
         u64::MAX
@@ -397,11 +407,7 @@ fn append_canonical_csv_row(
     metrics: &TrialMetrics,
 ) -> std::io::Result<()> {
     let file_exists = path.exists();
-    let mut file = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .append(true)
-        .open(path)?;
+    let mut file = OpenOptions::new().create(true).append(true).open(path)?;
 
     if !file_exists || file.metadata()?.len() == 0 {
         writeln!(
@@ -476,15 +482,48 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let execution = async {
         match args.role {
             NodeRole::SatA => {
-                send_reliable_stage(&socket, args.peer, 1, &init_payload, args.mtu, args.rate_kbps, &mut metrics).await?;
-                let (_, _) = receive_reliable_stage(&socket, 2, spec.resp_bytes, args.mtu, &mut metrics).await?;
-                send_reliable_stage(&socket, args.peer, 3, &confirm_payload, args.mtu, args.rate_kbps, &mut metrics).await?;
+                send_reliable_stage(
+                    &socket,
+                    args.peer,
+                    1,
+                    &init_payload,
+                    args.mtu,
+                    args.rate_kbps,
+                    &mut metrics,
+                )
+                .await?;
+                let (_, _) =
+                    receive_reliable_stage(&socket, 2, spec.resp_bytes, args.mtu, &mut metrics)
+                        .await?;
+                send_reliable_stage(
+                    &socket,
+                    args.peer,
+                    3,
+                    &confirm_payload,
+                    args.mtu,
+                    args.rate_kbps,
+                    &mut metrics,
+                )
+                .await?;
                 Ok::<(), &'static str>(())
             }
             NodeRole::SatB => {
-                let (client_peer, _) = receive_reliable_stage(&socket, 1, spec.init_bytes, args.mtu, &mut metrics).await?;
-                send_reliable_stage(&socket, client_peer, 2, &resp_payload, args.mtu, args.rate_kbps, &mut metrics).await?;
-                let (_, _) = receive_reliable_stage(&socket, 3, spec.confirm_bytes, args.mtu, &mut metrics).await?;
+                let (client_peer, _) =
+                    receive_reliable_stage(&socket, 1, spec.init_bytes, args.mtu, &mut metrics)
+                        .await?;
+                send_reliable_stage(
+                    &socket,
+                    client_peer,
+                    2,
+                    &resp_payload,
+                    args.mtu,
+                    args.rate_kbps,
+                    &mut metrics,
+                )
+                .await?;
+                let (_, _) =
+                    receive_reliable_stage(&socket, 3, spec.confirm_bytes, args.mtu, &mut metrics)
+                        .await?;
                 Ok::<(), &'static str>(())
             }
         }
