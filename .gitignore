@@ -1,0 +1,28 @@
+# Rust build artifacts
+target/
+**/*.rs.bk
+*.pdb
+
+# Python bytecode & environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+.pytest_cache/
+
+# LaTeX build artifacts & temporary files
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.fdb_latexmk
+paper/*.fls
+paper/*.log
+paper/*.out
+paper/*.synctex.gz
+paper/*.toc
+
+# Testbed run-time socket captures / temp dumps
+*.pcap
+*.sock
