@@ -1,0 +1,9 @@
+{
+  "run_id": "scenario_f2",
+  "timestamp_utc": "2026-08-26T19:05:14.476708+00:00",
+  "git_commit": "unknown",
+  "parameters": {
+    "trials": 30,
+    "trace": "sgp4_crossing_pass_trace.csv"
+  }
+}

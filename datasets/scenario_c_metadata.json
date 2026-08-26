@@ -1,0 +1,18 @@
+{
+  "run_id": "scenario_c",
+  "timestamp_utc": "2026-08-26T18:57:37.924487+00:00",
+  "git_commit": "unknown",
+  "parameters": {
+    "trials": 30,
+    "timeouts_ms": [
+      250,
+      500,
+      1000,
+      1500,
+      2000,
+      3000
+    ],
+    "rate_kbps": 128,
+    "loss_pct": 5.0
+  }
+}

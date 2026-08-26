@@ -1,0 +1,17 @@
+{
+  "run_id": "scenario_d",
+  "timestamp_utc": "2026-08-26T19:01:50.126369+00:00",
+  "git_commit": "unknown",
+  "parameters": {
+    "trials": 20,
+    "rates_kbps": [
+      64,
+      128,
+      256,
+      512,
+      1024
+    ],
+    "loss_pct": 1.0,
+    "mtu": 1500
+  }
+}
