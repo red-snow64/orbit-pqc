@@ -15,6 +15,7 @@ DATASET_DIR = os.path.abspath("datasets")
 FIGURE_DIR = os.path.abspath("figures")
 os.makedirs(FIGURE_DIR, exist_ok=True)
 
+# Strict IEEE Typography & Bounding Box Safety
 plt.rcParams.update({
     "font.family": "serif",
     "font.serif": ["Times New Roman", "Times", "DejaVu Serif"],
@@ -49,10 +50,11 @@ def safe_load_csv(filename: str):
         return None
 
 def main():
-    fig, axes = plt.subplots(1, 3, figsize=(7.0, 2.15))
-    plt.subplots_adjust(top=0.86, bottom=0.20, left=0.08, right=0.98, wspace=0.32)
+    fig, axes = plt.subplots(1, 3, figsize=(7.16, 2.2))
 
-    # Panel (a): Scenario A
+    # -------------------------------------------------------------------------
+    # Panel (a): Scenario A - Latency vs. Loss
+    # -------------------------------------------------------------------------
     ax = axes[0]
     df_a = safe_load_csv("scenario_a_ber_sweep.csv")
     if df_a is not None and not df_a.empty:
@@ -81,7 +83,9 @@ def main():
     ax.grid(True)
     ax.legend(loc="upper left", framealpha=0.85)
 
-    # Panel (b): Scenario B
+    # -------------------------------------------------------------------------
+    # Panel (b): Scenario B - Contact Window Preservation (\eta_{win})
+    # -------------------------------------------------------------------------
     ax = axes[1]
     df_b = safe_load_csv("scenario_b_bandwidth_sweep.csv")
     if df_b is not None and not df_b.empty:
@@ -115,7 +119,9 @@ def main():
     ax.grid(True)
     ax.legend(loc="lower right", framealpha=0.85)
 
-    # Panel (c): Scenario D
+    # -------------------------------------------------------------------------
+    # Panel (c): Scenario D - Ablation
+    # -------------------------------------------------------------------------
     ax = axes[2]
     df_d = safe_load_csv("scenario_d_ablation.csv")
     if df_d is not None and not df_d.empty:
@@ -141,9 +147,9 @@ def main():
     ax.legend(loc="upper right", framealpha=0.85)
 
     out_pdf = os.path.join(FIGURE_DIR, "fig_combined_empirical_ieee.pdf")
-    plt.savefig(out_pdf, dpi=300)
-    plt.close()
-    print(f"[+] Saved IEEE vector plot to: {out_pdf}")
+    plt.savefig(out_pdf, dpi=300, bbox_inches="tight", pad_inches=0.02)
+    plt.close(fig)
+    print(f"[+] Saved pristine IEEE vector plot to: {out_pdf}")
 
 if __name__ == "__main__":
     main()
