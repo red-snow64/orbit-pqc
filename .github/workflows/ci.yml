@@ -2,9 +2,9 @@ name: ORBIT-PQC Testbed CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ V1 ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ V1 ]
 
 jobs:
   rust-engine:
@@ -81,7 +81,7 @@ jobs:
       - name: Install TeX Live
         run: |
           sudo apt-get update
-          sudo apt-get install -y texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended  texlive-publishers
+          sudo apt-get install -y texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-publishers
 
       - name: Generate Dynamic LaTeX Artifacts
         run: |
