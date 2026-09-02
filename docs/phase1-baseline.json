@@ -1,0 +1,20 @@
+{
+  "phase": "1",
+  "name": "freeze-and-reproduce",
+  "baseline_commit": "294973d9987c48835fc5c42e398460d8beaf9579",
+  "baseline_commit_message": "Fix: Paper Formatting Issue",
+  "branch": "phase1/reproducibility-baseline",
+  "purpose": "Preserve the current research artifact before cryptographic, physical-model, statistical, or protocol changes.",
+  "tracked_artifacts": {
+    "rust_lockfile": "Cargo.lock",
+    "python_requirements": "python/requirements.txt",
+    "experiment_runner": "python/experiments/runner.py",
+    "orbital_generator": "python/experiments/sgp4_emulator.py",
+    "statistics": "python/experiments/stats.py",
+    "latex_parser": "python/experiments/parser.py",
+    "ieee_plot_generator": "python/plots/generate_ieee_plots.py",
+    "paper": "paper/brief.tex"
+  },
+  "historical_metadata_policy": "Existing datasets are retained unchanged. Metadata containing git_commit=unknown is historical and must not be rewritten as if it were captured from a known commit.",
+  "next_phase": "cryptographic-correctness"
+}
