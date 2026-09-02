@@ -50,6 +50,12 @@ Historical datasets whose metadata records `git_commit: "unknown"` are retained 
 - When a result changes, regenerate downstream artifacts from the raw dataset rather than editing LaTeX numbers by hand.
 - Do not modify historical provenance metadata solely to make it appear reproducible.
 
+## V1 cryptographic correctness gate
+
+The V1 crypto layer currently wraps `pqcrypto-kyber` 0.8.1 and `pqcrypto-dilithium` 0.5.0. The implementation exposes ML-KEM-768 and ML-DSA-65 parameter sizes and now includes API-level tests for valid operation, tampered inputs, wrong-key behavior, message binding, public-key binding, and parameter sizes.
+
+These tests are correctness checks for the wrapper API; they are not sufficient to establish FIPS 203/204 conformance or interoperability. Known-answer-vector (KAT) and interoperability validation must be completed before making conformance claims or regenerating experimental results based on those claims.
+
 ## Baseline limitations
 
 The baseline metadata predates this protocol and some historical sidecars contain `git_commit: "unknown"`. The baseline also represents the current implementation and is not a declaration that the cryptographic construction, orbital model, or statistical methodology has already been fully validated. Those are targets for subsequent research phases.
