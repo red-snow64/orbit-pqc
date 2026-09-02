@@ -60,9 +60,8 @@ mod tests {
         let (ciphertext, sender_shared_secret) =
             MlKem768::encapsulate(&intended_receiver.public_key).expect("Encaps failed");
 
-        let wrong_shared_secret =
-            MlKem768::decapsulate(&wrong_receiver.secret_key, &ciphertext)
-                .expect("Decaps failed");
+        let wrong_shared_secret = MlKem768::decapsulate(&wrong_receiver.secret_key, &ciphertext)
+            .expect("Decaps failed");
 
         assert_ne!(
             sender_shared_secret.0, wrong_shared_secret.0,
@@ -76,8 +75,7 @@ mod tests {
         let valid_message = b"CCSDS_TELECOMMAND_ORBIT_BURN_001";
         let forged_message = b"CCSDS_TELECOMMAND_ORBIT_BURN_999";
 
-        let signature =
-            MlDsa65::sign(&keypair.secret_key, valid_message).expect("Signing failed");
+        let signature = MlDsa65::sign(&keypair.secret_key, valid_message).expect("Signing failed");
 
         assert!(
             MlDsa65::verify(&keypair.public_key, valid_message, &signature).is_ok(),
