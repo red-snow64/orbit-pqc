@@ -52,11 +52,11 @@ Historical datasets whose metadata records `git_commit: "unknown"` are retained 
 
 ## V1 cryptographic correctness gate
 
-The V1 crypto layer currently wraps `pqcrypto-kyber` 0.8.1 and `pqcrypto-dilithium` 0.5.0. The implementation exposes ML-KEM-768 and ML-DSA-65 parameter sizes and includes API-level tests for valid operation, tampered inputs, wrong-key behavior, message binding, public-key binding, and parameter sizes.
+The V1 runtime wrapper has been migrated from legacy `pqcrypto-kyber`/`pqcrypto-dilithium` to the standardized `pqcrypto-mlkem` 0.1.1 and `pqcrypto-mldsa` 0.1.2 APIs. The wrapper still exposes ML-KEM-768 and ML-DSA-65 and retains API-level tests for valid operation, tampered inputs, wrong-key behavior, message binding, public-key binding, and parameter sizes.
 
-Those legacy Kyber/Dilithium wrapper crates are now marked unmaintained upstream and have been superseded by standardized ML-KEM/ML-DSA interfaces. The current tests therefore remain wrapper-level evidence only; they do not establish that this repository is using an actively maintained implementation or that it is FIPS 203/204 conformant.
+This migration removes the legacy Kyber/Dilithium package names, but it does not by itself establish that the selected PQClean-based crates remain actively maintained or that the implementation is FIPS 203/204 conformant. Byte-exact known-answer-vector/interoperability tests are still required.
 
-Before the crypto gate is considered complete, migrate the runtime implementation to maintained standardized ML-KEM/ML-DSA crates, regenerate `Cargo.lock` in a networked CI environment, and add byte-exact known-answer-vector/interoperability tests. Do not regenerate experimental results or make FIPS conformance claims until those checks pass.
+The dependency manifest has been migrated, but `Cargo.lock` has not yet been regenerated because this environment cannot perform the required networked Cargo resolution. Do not regenerate experimental results or make FIPS conformance claims until the lockfile is regenerated in networked CI and the KAT/interoperability checks pass.
 
 ## Baseline limitations
 
