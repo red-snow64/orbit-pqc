@@ -17,14 +17,16 @@ Each experiment should produce a sidecar metadata file in `datasets/` containing
 
 - unique run ID;
 - UTC timestamp;
-- Git commit;
+- Git commit, short commit, and dirty-worktree state;
 - experiment parameters;
-- software/environment versions;
-- random seed(s), when applicable;
-- input trace identifiers/hashes;
-- output dataset identifier/hash.
+- Python, Rust/Cargo, platform, and relevant Python package versions;
+- random seed(s), when applicable, or an explicit `not_applicable` marker;
+- input trace identifiers and SHA-256 hashes when traces are used;
+- output dataset identifiers and SHA-256 hashes after execution.
 
-The existing runner already writes a run ID, UTC timestamp, Git commit and parameter block. Historical datasets whose metadata records `git_commit: "unknown"` are retained as historical results and must not be relabeled retroactively.
+The initial runner metadata is created before a run. After the run, provenance should be finalized with `python/experiments/provenance.py <run_id> [--seed N]`. Finalization is separate from measurement generation so hashes describe completed artifacts.
+
+Historical datasets whose metadata records `git_commit: "unknown"` are retained as historical results and must not be relabeled retroactively.
 
 ## Reproduction order
 
@@ -32,10 +34,11 @@ The existing runner already writes a run ID, UTC timestamp, Git commit and param
 2. Build the release protocol binary with `cargo build --release`.
 3. Generate SGP4 traces with `python/experiments/sgp4_emulator.py`.
 4. Execute an explicitly selected scenario with `python/experiments/runner.py` on a Linux host with the required network-namespace privileges.
-5. Run `python/experiments/stats.py` against the generated datasets.
-6. Regenerate LaTeX metrics/tables with `python/experiments/parser.py`.
-7. Regenerate the IEEE figure with `python/plots/generate_ieee_plots.py`.
-8. Compile `paper/brief.tex` twice with `pdflatex`.
+5. Finalize the run provenance sidecar with `python/experiments/provenance.py <run_id>`; provide `--seed N` only when stochastic sampling is used.
+6. Run `python/experiments/stats.py` against the generated datasets.
+7. Regenerate LaTeX metrics/tables with `python/experiments/parser.py`.
+8. Regenerate the IEEE figure with `python/plots/generate_ieee_plots.py`.
+9. Compile `paper/brief.tex` twice with `pdflatex`.
 
 ## Measurement policy
 
@@ -45,6 +48,7 @@ The existing runner already writes a run ID, UTC timestamp, Git commit and param
 - Record failures/timeouts as experimental outcomes.
 - Distinguish measured results, modeled results, and derived metrics in the paper.
 - When a result changes, regenerate downstream artifacts from the raw dataset rather than editing LaTeX numbers by hand.
+- Do not modify historical provenance metadata solely to make it appear reproducible.
 
 ## Baseline limitations
 

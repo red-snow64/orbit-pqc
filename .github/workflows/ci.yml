@@ -58,6 +58,9 @@ jobs:
           pip install --upgrade pip
           pip install numpy pandas scipy matplotlib sgp4
 
+      - name: Validate Reproducibility Tooling Syntax
+        run: python3 -m py_compile python/experiments/runner.py python/experiments/provenance.py
+
       - name: Verify SGP4 Constellation Physics Generation
         run: python3 python/experiments/sgp4_emulator.py
 

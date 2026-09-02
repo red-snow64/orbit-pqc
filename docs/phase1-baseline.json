@@ -9,12 +9,20 @@
     "rust_lockfile": "Cargo.lock",
     "python_requirements": "python/requirements.txt",
     "experiment_runner": "python/experiments/runner.py",
+    "provenance_finalizer": "python/experiments/provenance.py",
     "orbital_generator": "python/experiments/sgp4_emulator.py",
     "statistics": "python/experiments/stats.py",
     "latex_parser": "python/experiments/parser.py",
     "ieee_plot_generator": "python/plots/generate_ieee_plots.py",
     "paper": "paper/brief.tex"
   },
+  "provenance_requirements": [
+    "exact Git commit and dirty-worktree state",
+    "Python, Rust/Cargo, platform, and relevant package versions",
+    "random seed or explicit not_applicable marker",
+    "SHA-256 hashes for used input traces",
+    "SHA-256 hashes for generated output datasets"
+  ],
   "historical_metadata_policy": "Existing datasets are retained unchanged. Metadata containing git_commit=unknown is historical and must not be rewritten as if it were captured from a known commit.",
   "next_phase": "cryptographic-correctness"
 }
