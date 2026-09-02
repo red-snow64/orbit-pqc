@@ -52,9 +52,11 @@ Historical datasets whose metadata records `git_commit: "unknown"` are retained 
 
 ## V1 cryptographic correctness gate
 
-The V1 crypto layer currently wraps `pqcrypto-kyber` 0.8.1 and `pqcrypto-dilithium` 0.5.0. The implementation exposes ML-KEM-768 and ML-DSA-65 parameter sizes and now includes API-level tests for valid operation, tampered inputs, wrong-key behavior, message binding, public-key binding, and parameter sizes.
+The V1 crypto layer currently wraps `pqcrypto-kyber` 0.8.1 and `pqcrypto-dilithium` 0.5.0. The implementation exposes ML-KEM-768 and ML-DSA-65 parameter sizes and includes API-level tests for valid operation, tampered inputs, wrong-key behavior, message binding, public-key binding, and parameter sizes.
 
-These tests are correctness checks for the wrapper API; they are not sufficient to establish FIPS 203/204 conformance or interoperability. Known-answer-vector (KAT) and interoperability validation must be completed before making conformance claims or regenerating experimental results based on those claims.
+Those legacy Kyber/Dilithium wrapper crates are now marked unmaintained upstream and have been superseded by standardized ML-KEM/ML-DSA interfaces. The current tests therefore remain wrapper-level evidence only; they do not establish that this repository is using an actively maintained implementation or that it is FIPS 203/204 conformant.
+
+Before the crypto gate is considered complete, migrate the runtime implementation to maintained standardized ML-KEM/ML-DSA crates, regenerate `Cargo.lock` in a networked CI environment, and add byte-exact known-answer-vector/interoperability tests. Do not regenerate experimental results or make FIPS conformance claims until those checks pass.
 
 ## Baseline limitations
 
