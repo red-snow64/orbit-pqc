@@ -10,6 +10,7 @@ The Phase 1 baseline is the repository state at commit `294973d9987c48835fc5c42e
 - Python dependencies are declared in `python/requirements.txt`.
 - CI uses Python 3.11 and the stable Rust toolchain.
 - IEEE paper compilation uses TeX Live with `texlive-publishers` for `IEEEtran.cls`.
+- The cryptographic layer currently uses `pqcrypto-kyber` 0.8.1 for the Kyber-768 implementation and `pqcrypto-dilithium` 0.5.0 for Dilithium3. These are retained as explicit dependencies until the Phase 2 interoperability and known-answer-vector checks are complete.
 
 ## Experiment provenance
 
@@ -49,6 +50,12 @@ Historical datasets whose metadata records `git_commit: "unknown"` are retained 
 - Distinguish measured results, modeled results, and derived metrics in the paper.
 - When a result changes, regenerate downstream artifacts from the raw dataset rather than editing LaTeX numbers by hand.
 - Do not modify historical provenance metadata solely to make it appear reproducible.
+
+## Cryptographic correctness gate
+
+Phase 2 begins with the existing cryptographic bindings rather than replacing them prematurely. The current test suite now checks ML-KEM-768 round-trip agreement, ciphertext tampering behavior, wrong-key behavior, ML-DSA-65 message/signature/public-key binding, and standardized parameter sizes.
+
+These tests establish API-level correctness properties but are not, by themselves, proof of FIPS 203/204 conformance. Before claiming standards conformance, Phase 2 must add interoperability or known-answer-vector validation against the standardized algorithms and record the exact implementation provenance. No experimental results should be regenerated from cryptographic changes until that gate is satisfied.
 
 ## Baseline limitations
 
