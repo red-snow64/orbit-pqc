@@ -6,8 +6,8 @@ authors = ["Orbit Core Team"]
 description = "FIPS 203/204 Post-Quantum Cryptography and Stateful Seed Engine"
 
 [dependencies]
-pqcrypto-kyber = "0.8"
-pqcrypto-dilithium = "0.5"
+pqcrypto-mlkem = "0.1.1"
+pqcrypto-mldsa = "0.1.2"
 pqcrypto-traits = "0.3"
 hmac = "0.12"
 sha2 = "0.10"
